@@ -1,0 +1,25 @@
+# Chrome extension
+*.crx
+*.pem
+
+# Icons (if generated)
+# Uncomment if you want to ignore generated icons
+# icons/*.png
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+
+# Node modules (if any)
+node_modules/
+

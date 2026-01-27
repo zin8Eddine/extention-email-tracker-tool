@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Email & Presence Checker</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>📧 Email & Presence Checker</h1>
+    </header>
+
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="email-list">Email List</button>
+      <button class="tab-btn" data-tab="gmail-results">Gmail Results</button>
+      <button class="tab-btn" data-tab="meet-results">Meet Results</button>
+    </div>
+
+    <!-- Email List Tab -->
+    <div class="tab-content active" id="email-list">
+      <div class="section">
+        <h2>Manage Email List</h2>
+        <div class="input-group">
+          <label for="email-input">Add emails (one per line or comma-separated):</label>
+          <textarea id="email-input" placeholder="user1@example.com&#10;user2@example.com&#10;user3@example.com"></textarea>
+        </div>
+        <div class="button-group">
+          <button id="add-emails-btn" class="btn btn-primary">Add Emails</button>
+          <button id="clear-list-btn" class="btn btn-secondary">Clear List</button>
+          <button id="export-list-btn" class="btn btn-secondary">Export List</button>
+        </div>
+        <div class="email-list-display">
+          <h3>Stored Emails (<span id="email-count">0</span>)</h3>
+          <div id="email-list-items" class="email-items"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Gmail Results Tab -->
+    <div class="tab-content" id="gmail-results">
+      <div class="section">
+        <h2>Gmail Label Analysis</h2>
+        <div class="status-info">
+          <p id="gmail-status">Not scanning. Open Gmail to start scanning.</p>
+        </div>
+        <div class="button-group">
+          <button id="scan-gmail-btn" class="btn btn-primary">Scan Selected Labels</button>
+          <button id="refresh-gmail-btn" class="btn btn-secondary">Refresh Results</button>
+        </div>
+        
+        <div class="results-section">
+          <div class="result-box">
+            <h3>📬 عناوين مؤسسات غير مؤلوفة</h3>
+            <div id="gmail-unknown" class="result-list"></div>
+          </div>
+          <div class="result-box">
+            <h3>❌ عناوين المؤسسات التي لم ترسل بعد</h3>
+            <div id="gmail-missing" class="result-list"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Meet Results Tab -->
+    <div class="tab-content" id="meet-results">
+      <div class="section">
+        <h2>Google Meet Presence</h2>
+        <div class="status-info">
+          <p id="meet-status">Not in a meeting. Join a Google Meet to track participants.</p>
+        </div>
+        <div class="button-group">
+          <button id="refresh-meet-btn" class="btn btn-primary">Refresh Participants</button>
+        </div>
+        
+        <div class="results-section">
+          <div class="result-box">
+            <h3>✅ عناوين المؤسسات الحاضرة</h3>
+            <div id="meet-present" class="result-list"></div>
+          </div>
+          <div class="result-box">
+            <h3>📬 عناوين المؤسسات الغير مؤلوفة</h3>
+            <div id="meet-unknown" class="result-list"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
+
