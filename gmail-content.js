@@ -108,71 +108,29 @@ async function scanGmailLabels() {
     // Wait for Gmail to load
     await waitForGmail();
 
-    // Extract sender emails only - Gmail uses specific DOM structure for sender information
-    // Method 1: Look for span elements with email attribute (Gmail's sender field)
-    const senderSpans = document.querySelectorAll('span[email]');
-    senderSpans.forEach(span => {
-      const email = span.getAttribute('email');
-      if (email) {
-        console.log("email",email);
-        const normalized = email.toLowerCase().trim();
-        if (normalized && normalized.includes('@')) {
-          extractedEmails.add(normalized);
-        }
-      }
-    });
+    // Extract sender emails only from the visible message list in the current label
+    // Structure we target (simplified):
+    // table > tbody > tr > td.yX ... > div.afn > span.bA4 > span.yP[email][data-hovercard-id]
+    const main = document.querySelector('[role="main"]');
+    if (main) {
+      const rows = main.querySelectorAll('table tbody tr');
+      console.log('Found rows in current label view:', rows.length);
 
-    // Method 2: Look for sender information in email list items (thread view)
-    // Gmail stores sender email in data attributes or specific class structures
-    const emailRows = document.querySelectorAll('[role="main"] tr[jsmodel], [role="main"] [data-thread-perm-id]');
-    emailRows.forEach(row => {
-      // Try to find sender email in the row
-      // Gmail often uses span[email] or data attributes
-      const emailSpan = row.querySelector('span[email]');
-      if (emailSpan) {
-        const email = emailSpan.getAttribute('email');
-        if (email) {
-          const normalized = email.toLowerCase().trim();
-          if (normalized && normalized.includes('@')) {
-            extractedEmails.add(normalized);
-          }
-        }
-      }
-      
-      // Also check for email in aria-label or title attributes of sender elements
-      const senderElement = row.querySelector('[class*="from"], [class*="sender"], [class*="yW"]');
-      if (senderElement) {
-        const ariaLabel = senderElement.getAttribute('aria-label') || senderElement.getAttribute('title');
-        if (ariaLabel) {
-          const emailMatch = ariaLabel.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
-          if (emailMatch) {
-            const normalized = emailMatch[0].toLowerCase().trim();
+      rows.forEach(row => {
+        const senderSpan = row.querySelector('div.afn span.bA4 span.yP[email][data-hovercard-id]');
+        if (senderSpan) {
+          const email = senderSpan.getAttribute('email') || senderSpan.getAttribute('data-hovercard-id');
+          if (email) {
+            const normalized = email.toLowerCase().trim();
             if (normalized && normalized.includes('@')) {
               extractedEmails.add(normalized);
             }
           }
         }
-      }
-    });
+      });
+    }
 
-    // Method 3: Look in the email list view for sender information
-    // Gmail's list view has specific classes for sender info
-    const listItems = document.querySelectorAll('[role="main"] [role="listitem"]');
-    listItems.forEach(item => {
-      // Find sender email in the item
-      const emailSpan = item.querySelector('span[email]');
-      if (emailSpan) {
-        const email = emailSpan.getAttribute('email');
-        if (email) {
-          const normalized = email.toLowerCase().trim();
-          if (normalized && normalized.includes('@')) {
-            extractedEmails.add(normalized);
-          }
-        }
-      }
-    });
-
-    console.log(`Found ${extractedEmails.size} unique sender emails`);
+    console.log(`Found ${extractedEmails.size} unique sender emails in this label`);
 
     // Ensure all extracted emails are normalized (already done, but double-check)
     const normalizedExtracted = new Set();
