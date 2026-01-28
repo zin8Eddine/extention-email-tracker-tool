@@ -184,21 +184,20 @@ async function scanGmailLabels() {
     });
 
     // Compare with stored list
-    // unknown = emails found in Gmail that are NOT in the stored list
-    // This should show emails like X, Y, Z if your list has A-M and Gmail has B, C, X, Y, Z
-    const unknown = Array.from(normalizedExtracted).filter(email => {
-      const isInList = storedEmailList.has(email);
-      if (isInList) {
-        console.log(`Email ${email} is in stored list, excluding from unknown`);
-      }
-      return !isInList;
-    });
-    
+    // present = emails that are BOTH in stored list AND in Gmail (sent)
+    const present = Array.from(storedEmailList).filter(email =>
+      normalizedExtracted.has(email)
+    );
+
     // missing = emails in stored list that are NOT found in Gmail
-    // This should show emails like A, D, E, F... if your list has A-M and Gmail only has B, C
-    const missing = Array.from(storedEmailList).filter(email => {
-      return !normalizedExtracted.has(email);
-    });
+    const missing = Array.from(storedEmailList).filter(email =>
+      !normalizedExtracted.has(email)
+    );
+
+    // unknown = emails found in Gmail that are NOT in the stored list
+    const unknown = Array.from(normalizedExtracted).filter(email =>
+      !storedEmailList.has(email)
+    );
 
     // Debug logging
     console.log('=== Gmail Scan Results ===');
@@ -206,13 +205,15 @@ async function scanGmailLabels() {
     console.log('Stored emails:', Array.from(storedEmailList));
     console.log('Extracted emails from Gmail size:', normalizedExtracted.size);
     console.log('Extracted emails:', Array.from(normalizedExtracted));
-    console.log('UNKNOWN emails (in Gmail but NOT in list):', unknown);
+    console.log('PRESENT emails (in list AND in Gmail):', present);
     console.log('MISSING emails (in list but NOT in Gmail):', missing);
+    console.log('UNKNOWN emails (in Gmail but NOT in list):', unknown);
 
     // Save results
     const results = {
-      unknown: unknown,
+      present: present,
       missing: missing,
+      unknown: unknown,
       totalScanned: extractedEmails.size,
       timestamp: new Date().toISOString(),
       labelName: getCurrentLabelName()

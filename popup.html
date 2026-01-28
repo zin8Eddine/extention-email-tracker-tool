@@ -51,13 +51,34 @@
         </div>
         
         <div class="results-section">
-          <div class="result-box">
-            <h3>📬 عناوين مؤسسات غير مؤلوفة</h3>
-            <div id="gmail-unknown" class="result-list"></div>
-          </div>
-          <div class="result-box">
-            <h3>❌ عناوين المؤسسات التي لم ترسل بعد</h3>
+          <!-- 1) Missing (not sent yet) - open by default -->
+          <div class="result-box expandable open">
+            <div class="result-header" data-target="gmail-missing">
+              <span class="caret">▼</span>
+              <h3>❌ عناوين المؤسسات التي لم ترسل بعد</h3>
+              <span class="count" id="gmail-missing-count"></span>
+            </div>
             <div id="gmail-missing" class="result-list"></div>
+          </div>
+
+          <!-- 2) Present (sent) -->
+          <div class="result-box expandable">
+            <div class="result-header" data-target="gmail-present">
+              <span class="caret">▶</span>
+              <h3>✅ عناوين المؤسسات التي أرسلت</h3>
+              <span class="count" id="gmail-present-count"></span>
+            </div>
+            <div id="gmail-present" class="result-list" style="display:none;"></div>
+          </div>
+
+          <!-- 3) Unknown (not in list) -->
+          <div class="result-box expandable">
+            <div class="result-header" data-target="gmail-unknown">
+              <span class="caret">▶</span>
+              <h3>📬 عناوين مؤسسات غير مؤلوفة</h3>
+              <span class="count" id="gmail-unknown-count"></span>
+            </div>
+            <div id="gmail-unknown" class="result-list" style="display:none;"></div>
           </div>
         </div>
       </div>

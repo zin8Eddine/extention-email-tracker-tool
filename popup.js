@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   await loadEmailList();
   setupTabs();
   setupEventListeners();
+  setupExpandableResults();
   updateEmailListDisplay();
   await refreshResults();
 });
@@ -205,6 +206,33 @@ function setupEventListeners() {
   });
 }
 
+// Setup expandable result boxes (collapse/expand)
+function setupExpandableResults() {
+  const headers = document.querySelectorAll('.result-header');
+  headers.forEach(header => {
+    header.addEventListener('click', () => {
+      const targetId = header.getAttribute('data-target');
+      if (!targetId) return;
+
+      const listEl = document.getElementById(targetId);
+      const caretEl = header.querySelector('.caret');
+      const box = header.closest('.result-box');
+      if (!listEl || !caretEl || !box) return;
+
+      const isOpen = listEl.style.display !== 'none';
+      if (isOpen) {
+        listEl.style.display = 'none';
+        caretEl.textContent = '▶';
+        box.classList.remove('open');
+      } else {
+        listEl.style.display = 'block';
+        caretEl.textContent = '▼';
+        box.classList.add('open');
+      }
+    });
+  });
+}
+
 // Update email list display
 function updateEmailListDisplay() {
   const container = document.getElementById('email-list-items');
@@ -250,21 +278,23 @@ async function refreshResults() {
     displayMeetResults(meetResults.meetResults);
   }
 
-  // Update status
+  // Update Meet status (Gmail status is managed by displayGmailResults)
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-  if (tab.url) {
-    if (tab.url.includes('mail.google.com')) {
-      document.getElementById('gmail-status').textContent = 'Gmail detected. Ready to scan.';
-    } else if (tab.url.includes('meet.google.com')) {
-      document.getElementById('meet-status').textContent = 'Google Meet detected. Ready to track.';
-    }
+  if (tab.url && tab.url.includes('meet.google.com')) {
+    document.getElementById('meet-status').textContent = 'Google Meet detected. Ready to track.';
   }
 }
 
 // Display Gmail results
 function displayGmailResults(results) {
-  const unknownContainer = document.getElementById('gmail-unknown');
   const missingContainer = document.getElementById('gmail-missing');
+  const presentContainer = document.getElementById('gmail-present');
+  const unknownContainer = document.getElementById('gmail-unknown');
+
+  const missingCountEl = document.getElementById('gmail-missing-count');
+  const presentCountEl = document.getElementById('gmail-present-count');
+  const unknownCountEl = document.getElementById('gmail-unknown-count');
+
   const statusEl = document.getElementById('gmail-status');
   
   // Show label/view that was scanned
@@ -273,26 +303,43 @@ function displayGmailResults(results) {
     statusEl.textContent = `تم الفحص في: ${labelName}`;
   }
 
-  // Unknown emails
-  unknownContainer.innerHTML = '';
-  if (results.unknown && results.unknown.length > 0) {
-    results.unknown.forEach(email => {
-      const item = document.createElement('div');
-      item.className = 'result-item';
-      item.textContent = email;
-      unknownContainer.appendChild(item);
-    });
-  }
-  
-  // Missing emails
+  // Missing emails (not sent yet)
+  const missing = results.missing || [];
   missingContainer.innerHTML = '';
-  if (results.missing && results.missing.length > 0) {
-    results.missing.forEach(email => {
-      const item = document.createElement('div');
-      item.className = 'result-item';
-      item.textContent = email;
-      missingContainer.appendChild(item);
-    });
+  missing.forEach(email => {
+    const item = document.createElement('div');
+    item.className = 'result-item';
+    item.textContent = email;
+    missingContainer.appendChild(item);
+  });
+  if (missingCountEl) {
+    missingCountEl.textContent = `(${missing.length})`;
+  }
+
+  // Present emails (sent)
+  const present = results.present || [];
+  presentContainer.innerHTML = '';
+  present.forEach(email => {
+    const item = document.createElement('div');
+    item.className = 'result-item';
+    item.textContent = email;
+    presentContainer.appendChild(item);
+  });
+  if (presentCountEl) {
+    presentCountEl.textContent = `(${present.length})`;
+  }
+
+  // Unknown emails (not in list)
+  const unknown = results.unknown || [];
+  unknownContainer.innerHTML = '';
+  unknown.forEach(email => {
+    const item = document.createElement('div');
+    item.className = 'result-item';
+    item.textContent = email;
+    unknownContainer.appendChild(item);
+  });
+  if (unknownCountEl) {
+    unknownCountEl.textContent = `(${unknown.length})`;
   }
 }
 
